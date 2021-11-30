@@ -1,12 +1,14 @@
 import "./App.css";
-import { useState } from "react";
 import Axios from "axios";
+import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 
 function App() {
   const getInitialState = () => {
     const gender = "Male";
     return gender;
   };
+  const navigate = useNavigate();
 
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
@@ -14,7 +16,6 @@ function App() {
   const [gender, setGender] = useState(getInitialState);
 
   const [newName, setNewName] = useState("");
-
   const [studentList, setStudentList] = useState([]);
 
   const [deptList, setDeptList] = useState([]);
@@ -26,6 +27,22 @@ function App() {
   const handleDepartment = (e) => {
     setDept(e.target.value);
   };
+
+  // ------------------------------------------------------
+  const [role, setRole] = useState("");
+  const [username, setUsername] = useState("");
+  Axios.defaults.withCredentials = true;
+
+  useEffect(() => {
+    Axios.get("http://localhost:3001/login").then((response) => {
+      if (response.data.loggedIn == true) {
+        setRole(response.data.user[0].role);
+        setUsername(response.data.user[0].username);
+        // console.log(response);
+      }
+    });
+  }, []);
+  // -------------------------------------------------------
 
   // FUNCTIONS ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -69,7 +86,7 @@ function App() {
   };
 
   const updateStudent = (id) => {
-    Axios.put("http://localhost:3001/update", {
+    Axios.put(`http://localhost:3001/update/${id}`, {
       id: id,
       name: newName,
     }).then((response) => {
@@ -102,6 +119,10 @@ function App() {
   //  RETURN THE PAGE WITH FORM AND LIST --------------------------------------------------------------------------------------------------------------
   return (
     <div className="App">
+      <div>
+        <h1>Username: {username}</h1>
+        <h1>Role: {role}</h1>
+      </div>
       <div className="information">
         <label>Name</label>
         <input
@@ -175,12 +196,13 @@ function App() {
                     setNewName(event.target.value);
                   }}
                 />
+
                 <button
                   onClick={() => {
                     updateStudent(val.id);
                   }}
                 >
-                  Update
+                  Update student
                 </button>
                 <div>
                   <button
